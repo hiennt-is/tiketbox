@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title} + ' · TicketBox'">TicketBox</title>
+  <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+
+<header th:fragment="nav" class="nav">
+  <div class="nav-inner">
+    <a class="brand" th:href="@{/events}">🎟️ TicketBox</a>
+    <nav>
+      <a th:href="@{/events}">Sự kiện</a>
+      <th:block th:if="${me != null}">
+        <a th:href="@{/me/bookings}">Vé của tôi</a>
+        <a th:if="${me.admin}" th:href="@{/admin/bookings}">Quản trị</a>
+        <span class="muted">Xin chào, <b th:text="${me.username}">user</b></span>
+        <form th:action="@{/logout}" method="post" class="inline">
+          <button type="submit" class="link">Đăng xuất</button>
+        </form>
+      </th:block>
+      <th:block th:if="${me == null}">
+        <a th:href="@{/login}">Đăng nhập</a>
+        <a class="btn-sm" th:href="@{/register}">Đăng ký</a>
+      </th:block>
+    </nav>
+  </div>
+</header>
+
+<th:block th:fragment="flash">
+  <div class="flash ok" th:if="${success}" th:text="${success}"></div>
+  <div class="flash err" th:if="${error}" th:text="${error}"></div>
+</th:block>
+
+</body>
+</html>

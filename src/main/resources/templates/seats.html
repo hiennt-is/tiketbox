@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${event.name})}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+  <a th:href="@{/events}">← Tất cả sự kiện</a>
+  <h1 th:text="${event.name}">Tên sự kiện</h1>
+  <p class="muted">
+    <span th:text="${@fmt.dateTime(event.startTime)}"></span> ·
+    còn <b th:text="${freeCount}">0</b> ghế trống
+  </p>
+
+  <th:block th:replace="~{fragments :: flash}"></th:block>
+  <div class="flash err" th:if="${started}">Sự kiện đã bắt đầu, không thể đặt vé.</div>
+
+  <div class="grid2">
+    <!-- Sơ đồ ghế: mỗi ghế là 1 nút submit. Ghế trống thì giữ, ghế của mình thì bỏ giữ. -->
+    <form class="card" method="post" th:action="@{/events/{id}/holds(id=${event.id})}">
+      <div class="screen">SÂN KHẤU</div>
+      <div class="seat-row" th:each="row : ${rows}">
+        <span class="row-label" th:text="${row.key}">A</span>
+        <th:block th:each="s : ${row.value}">
+          <button th:if="${s.free}" type="submit" name="seatId" th:value="${s.id}"
+                  class="seat FREE" th:text="${s.code}" th:disabled="${me == null or started}"
+                  th:title="${me == null} ? 'Đăng nhập để chọn ghế' : 'Bấm để giữ ghế'">A1</button>
+          <button th:if="${s.mineHeld}" type="submit" name="seatId" th:value="${s.id}"
+                  th:formaction="@{/events/{id}/holds/release(id=${event.id})}"
+                  class="seat MINE_HELD" th:text="${s.code}" title="Bấm để bỏ giữ">A1</button>
+          <button th:if="${!s.free and !s.mineHeld}" type="button" disabled
+                  th:class="|seat ${s.state}|" th:text="${s.code}">A1</button>
+        </th:block>
+      </div>
+      <div class="legend">
+        <span><i class="seat-dot FREE"></i>Trống</span>
+        <span><i class="seat-dot MINE_HELD"></i>Bạn đang giữ</span>
+        <span><i class="seat-dot MINE_BOOKED"></i>Vé của bạn</span>
+        <span><i class="seat-dot HELD"></i>Người khác đang giữ</span>
+        <span><i class="seat-dot BOOKED"></i>Đã bán</span>
+      </div>
+    </form>
+
+    <aside class="card">
+      <th:block th:if="${me == null}">
+        <strong>Muốn đặt vé?</strong>
+        <p class="muted">Hãy <a th:href="@{/login}">đăng nhập</a> hoặc <a th:href="@{/register}">đăng ký</a> để chọn ghế.</p>
+      </th:block>
+
+      <th:block th:if="${me != null}">
+        <strong>Ghế bạn đang giữ</strong>
+        <p class="muted" th:if="${myHolds.isEmpty()}">
+          Bấm vào ghế trống để giữ (tối đa <span th:text="${maxHeldSeats}">4</span> ghế).
+        </p>
+        <th:block th:unless="${myHolds.isEmpty()}">
+          <div class="chips">
+            <span class="chip" th:each="h : ${myHolds}" th:text="${h.code}">A1</span>
+          </div>
+          <p class="muted">
+            Giữ đến <b th:text="${@fmt.time(holdExpiresAt)}">00:00</b>
+            (còn <b id="countdown" th:attr="data-until=${holdExpiresAtMillis}">--:--</b>)
+          </p>
+          <form method="post" th:action="@{/events/{id}/confirm(id=${event.id})}">
+            <button class="primary wide" type="submit"
+                    th:text="|Xác nhận đặt ${myHolds.size()} vé|">Xác nhận đặt</button>
+          </form>
+        </th:block>
+      </th:block>
+    </aside>
+  </div>
+</main>
+
+<script>
+  // Đếm ngược thời gian giữ ghế; hết giờ thì tải lại trang để thấy ghế đã được nhả
+  (function () {
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    const until = Number(el.dataset.until);
+    function tick() {
+      const left = Math.max(0, Math.floor((until - Date.now()) / 1000));
+      el.textContent = String(Math.floor(left / 60)).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0');
+      if (left === 0) { setTimeout(() => location.reload(), 1500); return; }
+      setTimeout(tick, 1000);
+    }
+    tick();
+  })();
+</script>
+</body>
+</html>

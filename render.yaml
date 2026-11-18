@@ -1,0 +1,21 @@
+# Render Blueprint: Render đọc file này khi bạn chọn "New > Blueprint" và trỏ tới repo GitHub.
+services:
+  - type: web
+    name: ticketbox
+    runtime: docker
+    plan: free
+    region: singapore           # gần Việt Nam nhất; nên chọn region Neon cũng ở Singapore
+    healthCheckPath: /actuator/health
+    autoDeploy: true            # mỗi lần push lên nhánh chính là tự deploy lại
+    envVars:
+      # sync: false = Render sẽ hỏi bạn nhập giá trị lúc tạo (không lưu bí mật trong git)
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: "5"

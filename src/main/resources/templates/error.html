@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lỗi · TicketBox</title>
+  <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<main class="narrow">
+  <div class="card">
+    <h1 th:text="${status}">500</h1>
+    <p th:switch="${status}">
+      <span th:case="403">Bạn không có quyền truy cập trang này.</span>
+      <span th:case="404">Không tìm thấy trang bạn yêu cầu.</span>
+      <span th:case="*">Đã có lỗi xảy ra, vui lòng thử lại.</span>
+    </p>
+    <a th:href="@{/events}">← Về trang sự kiện</a>
+  </div>
+</main>
+</body>
+</html>

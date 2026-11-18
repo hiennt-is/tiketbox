@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Vé của tôi')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+  <h1>Vé của tôi</h1>
+  <th:block th:replace="~{fragments :: flash}"></th:block>
+
+  <div class="card" th:unless="${bookings.isEmpty()}">
+    <table>
+      <thead><tr><th>Mã vé</th><th>Sự kiện</th><th>Ghế</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody>
+      <tr th:each="b : ${bookings}" th:classappend="${b.status.name() == 'CANCELLED'} ? 'dim'">
+        <td th:text="|#${b.id}|"></td>
+        <td>
+          <a th:href="@{/events/{id}(id=${b.eventId})}" th:text="${b.eventName}"></a><br>
+          <span class="muted" th:text="${@fmt.dateTime(b.eventStart)}"></span>
+        </td>
+        <td><b th:text="${b.seatCode}"></b></td>
+        <td>
+          <span th:if="${b.status.name() == 'CONFIRMED'}" class="tag ok">Đã đặt</span>
+          <span th:if="${b.status.name() == 'CANCELLED'}" class="tag">Đã huỷ</span>
+        </td>
+        <td>
+          <form th:if="${b.cancellable(now)}" method="post"
+                th:action="@{/me/bookings/{id}/cancel(id=${b.id})}"
+                onsubmit="return confirm('Huỷ vé này?')">
+            <button class="danger" type="submit">Huỷ vé</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card" th:if="${bookings.isEmpty()}">
+    <p class="muted">Bạn chưa có vé nào. <a th:href="@{/events}">Xem sự kiện</a></p>
+  </div>
+</main>
+</body>
+</html>

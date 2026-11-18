@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: mvp
+  config:
+    # Đọc biến từ file .env (dùng chung với docker compose). Không có file thì bỏ qua.
+    import: optional:file:.env[.properties]
+  # Local: lấy từ .env. Trên cloud: đặt biến môi trường SPRING_DATASOURCE_URL / _USERNAME / _PASSWORD,
+  # biến môi trường luôn được ưu tiên hơn file này.
+  datasource:
+    url: jdbc:postgresql://localhost:${DB_PORT:5432}/${DB_NAME:mvp}
+    username: ${DB_USER:mvp_user}
+    password: ${DB_PASSWORD:changeme}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    # Đổi thành true để xem SQL thật (UPDATE ... WHERE id=? AND version=?)
+    show-sql: false
+  flyway:
+    enabled: true
+
+server:
+  # Render (và hầu hết nền tảng cloud) cấp cổng qua biến PORT
+  port: ${PORT:8080}
+  # App chạy sau proxy HTTPS của Render: đọc X-Forwarded-* để redirect đúng https://
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+
+booking:
+  hold-duration: 5m            # thời gian giữ ghế trước khi phải xác nhận
+  hold-release-interval: 30s   # chu kỳ job nhả ghế hết hạn giữ
+  max-held-seats: 4            # mỗi người giữ tối đa bao nhiêu ghế / sự kiện
+
+app:
+  zone: Asia/Ho_Chi_Minh       # múi giờ hiển thị trên giao diện (DB lưu UTC)
+  admin:
+    username: admin
+    # Đặt ADMIN_PASSWORD trong .env hoặc biến môi trường. Để trống thì không tạo admin.
+    password: ${ADMIN_PASSWORD:}

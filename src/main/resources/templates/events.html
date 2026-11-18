@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Sự kiện')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+  <h1>Sự kiện sắp diễn ra</h1>
+  <div class="flash ok" th:if="${param.logout}">Bạn đã đăng xuất.</div>
+
+  <div class="event-list">
+    <a class="card event" th:each="e : ${events}" th:href="@{/events/{id}(id=${e.id})}">
+      <strong th:text="${e.name}">Tên sự kiện</strong>
+      <span class="muted" th:text="${@fmt.dateTime(e.startTime)}">20:00 01/01/2026</span>
+      <span class="tag" th:if="${e.hasStarted(now)}">Đã diễn ra</span>
+    </a>
+  </div>
+  <p class="muted" th:if="${events.isEmpty()}">Chưa có sự kiện nào.</p>
+</main>
+</body>
+</html>
