@@ -69,20 +69,13 @@ Mỗi lần `git push` lên `main`, Render tự build và deploy lại. Migratio
 
 ## Thêm sự kiện mới
 
-Dữ liệu mẫu có 2 sự kiện, diễn ra 3 và 7 ngày **kể từ lúc deploy lần đầu**. Để thêm sự kiện, mở
-**Neon → SQL Editor** và chạy:
+Dữ liệu mẫu có 2 sự kiện, diễn ra 3 và 7 ngày **kể từ lúc deploy lần đầu**. Để thêm sự kiện:
 
-```sql
-WITH e AS (
-  INSERT INTO events (name, start_time)
-  VALUES ('Tên sự kiện mới', '2027-01-15 20:00:00+07')
-  RETURNING id
-)
-INSERT INTO seats (event_id, seat_code)
-SELECT e.id, r.l || n.n
-FROM e, (VALUES ('A'), ('B'), ('C')) r(l), generate_series(1, 10) n(n)
-ORDER BY r.l, n.n;
-```
+1. Đăng nhập `admin` → **Quản trị** → tab **Sự kiện** → **+ Tạo sự kiện**.
+2. Nhập tên, thời gian bắt đầu (giờ Việt Nam), số hàng (1–26, A–Z) và số ghế mỗi hàng (1–30).
+3. Bấm **Tạo sự kiện**: hệ thống tự sinh sơ đồ ghế (A1, A2, …) và sự kiện hiện ngay ở trang chủ.
+
+Không thể tạo 2 sự kiện trùng cả tên lẫn giờ bắt đầu (ràng buộc UNIQUE ở migration V5).
 
 ## Lỗi thường gặp
 

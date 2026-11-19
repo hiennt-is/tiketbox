@@ -48,6 +48,7 @@ class WebSecurityTest {
 	@Autowired PasswordEncoder passwordEncoder;
 	@Autowired BookingService bookingService;
 	@Autowired SeatRepository seatRepo;
+	@Autowired com.hien.mvp.event.EventRepository eventRepo;
 	@Autowired JdbcTemplate jdbc;
 
 	AppUserDetails alice;
@@ -139,6 +140,58 @@ class WebSecurityTest {
 		mvc.perform(get("/admin/bookings").with(user(boss)))
 				.andExpect(status().isOk())
 				.andExpect(content().string(Matchers.containsString("alice")));
+	}
+
+	@Test
+	void only_admin_can_create_events() throws Exception {
+		mvc.perform(get("/admin/events/new").with(user(alice))).andExpect(status().isForbidden());
+		mvc.perform(post("/admin/events").with(user(alice)).with(csrf())
+				.param("name", "Hack").param("startTime", "2099-01-01T20:00")
+				.param("rows", "1").param("seatsPerRow", "1"))
+				.andExpect(status().isForbidden());
+		assertThat(eventRepo.count()).isEqualTo(2);
+
+		mvc.perform(get("/admin/events").with(user(boss))).andExpect(status().isOk())
+				.andExpect(content().string(Matchers.containsString("Concert")));
+		mvc.perform(get("/admin/events/new").with(user(boss))).andExpect(status().isOk());
+	}
+
+	@Test
+	void event_form_shows_validation_errors() throws Exception {
+		mvc.perform(post("/admin/events").with(user(boss)).with(csrf())
+				.param("name", "").param("startTime", "2020-01-01T20:00")
+				.param("rows", "0").param("seatsPerRow", "31"))
+				.andExpect(status().isOk())
+				.andExpect(content().string(Matchers.containsString("Không được để trống")))
+				.andExpect(content().string(Matchers.containsString("phải ở tương lai")))
+				.andExpect(content().string(Matchers.containsString("Ít nhất 1 hàng")))
+				.andExpect(content().string(Matchers.containsString("Tối đa 30 ghế")));
+		assertThat(eventRepo.count()).isEqualTo(2);
+	}
+
+	@Test
+	void admin_creates_event_and_users_can_book_it() throws Exception {
+		mvc.perform(post("/admin/events").with(user(boss)).with(csrf())
+				.param("name", "Đêm nhạc Test").param("startTime", "2099-06-01T20:00")
+				.param("rows", "2").param("seatsPerRow", "4"))
+				.andExpect(redirectedUrl("/admin/events"));
+
+		var event = eventRepo.findAll().stream().filter(e -> e.getName().equals("Đêm nhạc Test")).findFirst()
+				.orElseThrow();
+		// 20:00 giờ VN = 13:00 UTC
+		assertThat(event.getStartTime()).isEqualTo(java.time.Instant.parse("2099-06-01T13:00:00Z"));
+		mvc.perform(get("/events")).andExpect(content().string(Matchers.containsString("Đêm nhạc Test")));
+
+		// Gửi lại đúng form đó (bấm 2 lần) thì bị báo trùng
+		mvc.perform(post("/admin/events").with(user(boss)).with(csrf())
+				.param("name", "Đêm nhạc Test").param("startTime", "2099-06-01T20:00")
+				.param("rows", "2").param("seatsPerRow", "4"))
+				.andExpect(status().isOk())
+				.andExpect(content().string(Matchers.containsString("Đã có sự kiện")));
+
+		Long newSeat = seatRepo.findByEventIdOrderByIdAsc(event.getId()).getFirst().getId();
+		bookingService.hold(newSeat, alice.id());
+		assertThat(bookingService.confirm(event.getId(), alice.id())).hasSize(1);
 	}
 
 }

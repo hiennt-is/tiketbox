@@ -22,7 +22,7 @@ Deploy miễn phí lên Render + Neon: xem [DEPLOY.md](DEPLOY.md).
 |---|---|
 | Khách | Xem sự kiện, xem sơ đồ ghế, đăng ký, đăng nhập |
 | Người dùng | Bấm ghế để **giữ 5 phút** (tối đa 4 ghế), bấm lại để bỏ giữ, **xác nhận** đặt tất cả ghế đang giữ, xem **Vé của tôi**, **huỷ vé** trước giờ diễn |
-| Admin | Xem toàn bộ booking, huỷ bất kỳ vé nào |
+| Admin | **Tạo sự kiện** (tự sinh sơ đồ ghế theo số hàng × số ghế mỗi hàng), xem số ghế đã bán, xem toàn bộ booking, huỷ bất kỳ vé nào |
 
 Luồng chính:
 
@@ -42,6 +42,7 @@ AVAILABLE --giữ--> HELD --xác nhận--> BOOKED
 | Xác nhận đúng lúc job nhả ghế hết hạn | Job tăng `version`, nên lần xác nhận đó thua và **không ghế nào** được đặt |
 | Đặt nhiều ghế | 1 transaction: được hết hoặc không được ghế nào |
 | 2 người đăng ký trùng username | Ràng buộc `UNIQUE`, không kiểm tra trước rồi mới insert |
+| Admin bấm "Tạo sự kiện" 2 lần | `UNIQUE (name, start_time)`; sự kiện và toàn bộ ghế lưu trong 1 transaction |
 | Mọi bug còn sót | Unique index `ux_booking_seat_confirmed`: mỗi ghế tối đa 1 booking CONFIRMED |
 
 Chi tiết nằm ở [BookingTransactions.java](src/main/java/com/hien/mvp/booking/BookingTransactions.java).
@@ -60,7 +61,7 @@ xảy ra lúc commit và đổi thành thông báo cho người dùng.
 ```
 user/      User, AppUserDetails, UserService (đăng ký), AdminInitializer
 security/  SecurityConfig
-event/     Event
+event/     Event, EventService (tạo sự kiện + sinh ghế)
 seat/      Seat (@Version), SeatRepository
 booking/   BookingTransactions (transaction), BookingService (dịch lỗi), HoldExpiryJob
 web/       Controller, SeatView, ViewFormatter (giờ VN), CurrentUserAdvice

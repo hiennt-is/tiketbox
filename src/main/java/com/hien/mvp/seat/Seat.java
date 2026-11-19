@@ -54,6 +54,15 @@ public class Seat {
 	@Column(nullable = false)
 	private Long version;
 
+	/** Ghế mới, còn trống. {@code version} để null, Hibernate tự đặt 0 khi lưu. */
+	public static Seat available(Long eventId, String seatCode) {
+		Seat s = new Seat();
+		s.eventId = eventId;
+		s.seatCode = seatCode;
+		s.status = SeatStatus.AVAILABLE;
+		return s;
+	}
+
 	/** Ghế đang trống, hoặc đã từng bị giữ nhưng hết hạn thì coi như trống. */
 	public boolean isFree(Instant now) {
 		return switch (status) {

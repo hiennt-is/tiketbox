@@ -21,6 +21,13 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 			  and s.heldByUserId = :userId and s.heldUntil >= :now""")
 	long countActiveHolds(@Param("eventId") Long eventId, @Param("userId") Long userId, @Param("now") Instant now);
 
+	/** Tổng số ghế và số ghế đã bán của từng sự kiện (trang quản trị). */
+	@Query("""
+			select new com.hien.mvp.seat.SeatStats(s.eventId, count(s),
+			    sum(case when s.status = com.hien.mvp.seat.SeatStatus.BOOKED then 1L else 0L end))
+			from Seat s group by s.eventId""")
+	List<SeatStats> statsPerEvent();
+
 	/**
 	 * Nhả các ghế giữ quá hạn bằng 1 câu UPDATE.
 	 * Có tăng {@code version}: nếu đúng lúc đó người dùng đang bấm "Xác nhận", transaction của họ

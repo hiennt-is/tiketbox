@@ -60,7 +60,17 @@ button.link { background: none; border: none; color: var(--primary); padding: 0;
 
 /* forms */
 label.field { display: block; margin: 12px 0 4px; font-size: .85rem; font-weight: 600; }
-input[type=text], input[type=password] { width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+input[type=text], input[type=password], input[type=number], input[type=datetime-local] {
+  width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 6px; font: inherit; background: #fff; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* admin */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 12px 0 4px; }
+.tabs a { padding: 8px 14px; text-decoration: none; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs a.active { color: var(--text); font-weight: 600; border-bottom-color: var(--primary); }
+.toolbar { display: flex; justify-content: flex-end; margin-top: 16px; }
+a.btn { display: inline-block; padding: 8px 14px; border-radius: 6px; text-decoration: none; }
+a.btn.primary { background: var(--primary); color: #fff; }
 .field-error { color: var(--err); font-size: .85rem; margin: 4px 0 0; }
 .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 button { font: inherit; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: #f3f4f6; cursor: pointer; }

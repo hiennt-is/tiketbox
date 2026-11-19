@@ -27,6 +27,11 @@ public class Event {
 	@Column(name = "start_time", nullable = false)
 	private Instant startTime;
 
+	public Event(String name, Instant startTime) {
+		this.name = name;
+		this.startTime = startTime;
+	}
+
 	public boolean hasStarted(Instant now) {
 		return !startTime.isAfter(now);
 	}

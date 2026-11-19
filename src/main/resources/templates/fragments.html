@@ -15,7 +15,7 @@
       <a th:href="@{/events}">Sự kiện</a>
       <th:block th:if="${me != null}">
         <a th:href="@{/me/bookings}">Vé của tôi</a>
-        <a th:if="${me.admin}" th:href="@{/admin/bookings}">Quản trị</a>
+        <a th:if="${me.admin}" th:href="@{/admin/events}">Quản trị</a>
         <span class="muted">Xin chào, <b th:text="${me.username}">user</b></span>
         <form th:action="@{/logout}" method="post" class="inline">
           <button type="submit" class="link">Đăng xuất</button>
@@ -28,6 +28,12 @@
     </nav>
   </div>
 </header>
+
+<!-- Tab chuyển giữa các trang quản trị. active = 'events' | 'bookings' -->
+<nav th:fragment="adminTabs(active)" class="tabs">
+  <a th:href="@{/admin/events}" th:classappend="${active == 'events'} ? 'active'">Sự kiện</a>
+  <a th:href="@{/admin/bookings}" th:classappend="${active == 'bookings'} ? 'active'">Booking</a>
+</nav>
 
 <th:block th:fragment="flash">
   <div class="flash ok" th:if="${success}" th:text="${success}"></div>

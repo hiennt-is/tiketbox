@@ -11,6 +11,9 @@ public final class TestDb {
 	public static void reset(JdbcTemplate jdbc) {
 		jdbc.update("DELETE FROM bookings");
 		jdbc.update("UPDATE seats SET status = 'AVAILABLE', held_by_user_id = NULL, held_until = NULL");
+		// Giữ lại 2 sự kiện seed (id 1, 2), xoá các sự kiện do test tạo ra
+		jdbc.update("DELETE FROM seats WHERE event_id > 2");
+		jdbc.update("DELETE FROM events WHERE id > 2");
 		jdbc.update("DELETE FROM users WHERE username <> 'admin'");
 	}
 

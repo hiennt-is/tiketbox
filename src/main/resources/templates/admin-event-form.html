@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tạo sự kiện')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="narrow">
+  <a th:href="@{/admin/events}">← Danh sách sự kiện</a>
+  <div class="card">
+    <h1>Tạo sự kiện</h1>
+    <form id="event-form" method="post" th:action="@{/admin/events}" th:object="${form}">
+      <div class="flash err" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></div>
+
+      <label class="field" for="name">Tên sự kiện</label>
+      <input type="text" th:field="*{name}" required maxlength="200" placeholder="vd: Concert Mùa Xuân">
+      <p class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+
+      <label class="field" for="startTime">Thời gian bắt đầu (giờ Việt Nam)</label>
+      <input type="datetime-local" th:field="*{startTime}" required>
+      <p class="field-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></p>
+
+      <div class="row2">
+        <div>
+          <label class="field" for="rows">Số hàng (A–Z)</label>
+          <input type="number" th:field="*{rows}" min="1" max="26" required>
+          <p class="field-error" th:if="${#fields.hasErrors('rows')}" th:errors="*{rows}"></p>
+        </div>
+        <div>
+          <label class="field" for="seatsPerRow">Ghế mỗi hàng</label>
+          <input type="number" th:field="*{seatsPerRow}" min="1" max="30" required>
+          <p class="field-error" th:if="${#fields.hasErrors('seatsPerRow')}" th:errors="*{seatsPerRow}"></p>
+        </div>
+      </div>
+      <p class="muted" id="seat-preview"></p>
+
+      <div class="buttons"><button id="submit" class="primary wide" type="submit">Tạo sự kiện</button></div>
+    </form>
+  </div>
+</main>
+<script>
+  (function () {
+    const rows = document.getElementById('rows');
+    const per = document.getElementById('seatsPerRow');
+    const preview = document.getElementById('seat-preview');
+    function update() {
+      const r = Number(rows.value), p = Number(per.value);
+      if (r >= 1 && r <= 26 && p >= 1 && p <= 30) {
+        const last = String.fromCharCode(64 + r);
+        preview.textContent = 'Sẽ tạo ' + (r * p) + ' ghế: A1 … ' + last + p;
+      } else {
+        preview.textContent = '';
+      }
+    }
+    rows.addEventListener('input', update);
+    per.addEventListener('input', update);
+    update();
+    // Khoá nút sau khi bấm để tránh gửi 2 lần (DB vẫn có unique constraint chặn phía sau)
+    document.getElementById('event-form').addEventListener('submit', function () {
+      const btn = document.getElementById('submit');
+      btn.disabled = true;
+      btn.textContent = 'Đang tạo...';
+    });
+  })();
+</script>
+</body>
+</html>
